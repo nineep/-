@@ -1,39 +1,27 @@
 # -*- coding: utf-8 -*-
 import os
-from configparser import ConfigParser
 from shutil import copyfile
-
 from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment
-
-cfg = ConfigParser()
-cfg.read('config.ini', encoding='utf-8')
+import xlwings as wx
 
 # 存放照片文件夹的目录
-# img_root_dir = 'C:\\Users\\ninee\\Desktop'
-img_root_dir = cfg['DEFAULT']['img_root_dir']
-
+img_root_dir = 'C:\\Users\\ninee\\Desktop'
 # 照片文件夹名字列表
-# img_dir_name_list = ['中国河南南阳镇平烟草局机房', '中国河南南阳镇平烟草局机房02',
-#                      '中国河南南阳镇平烟草局机房03', '中国河南南阳镇平烟草局机房04']
-img_dir_name_list = cfg['DEFAULT']['img_dir_name_list'].split()
+img_dir_name_list = ['中国河南南阳镇平烟草局机房', '中国河南南阳镇平烟草局机房02',
+                     '中国河南南阳镇平烟草局机房03', '中国河南南阳镇平烟草局机房04']
 
 # excel模板文件路径
-# excel_file_name = 'C:\\Users\\ninee\\Desktop\\附件2.标准勘察表--基站名.xlsx'
-excel_file_name = cfg['DEFAULT']['excel_file_name']
-
+excel_file_name = 'C:\\Users\\ninee\\Desktop\\附件2.标准勘察表--基站名.xlsx'
 # excel模板文件sheet表名
-# sheet_name = '勘察照片'
-sheet_name = cfg['DEFAULT']['sheet_name']
-
+sheet_name = '勘察照片'
 # excel中照片的标签，也是照片名，供插入照片使用
-# label_template = [0, 45, 90, 135, 180, 225, 270, 315,
-#                   31, 32, 33, 34, 41, 42, 43, 44,
-#                   51, 52, 53, 54, 55, 61, 62, 63, 64,
-#                   71, 72, 73, 74, 75, 81, 82, 83,
-#                   91, 92, 93, 94, 95, 21, 22, 23, 24, 25, 11]
-label_template = cfg['DEFAULT']['label_template'].split()
+label_template = [0, 45, 90, 135, 180, 225, 270, 315,
+                  31, 32, 33, 34, 41, 42, 43, 44,
+                  51, 52, 53, 54, 55, 61, 62, 63, 64,
+                  71, 72, 73, 74, 75, 81, 82, 83,
+                  91, 92, 93, 94, 95, 21, 22, 23, 24, 25, 11]
 
 
 def generate_new_excel(img_dir, template_excel_file_name=excel_file_name):
