@@ -61,6 +61,15 @@ def list_to_str(ls):
     return new_str
 
 
+def list_to_list(ls):
+    new_tup = []
+    for i in range(len(ls)):
+        tup = ls[i]
+        new_tup += tup
+    new_ls = list(set(new_tup))
+    return new_ls
+
+
 # 定义GUI界面
 
 # 定义 LabelFrame1 部件
@@ -107,12 +116,19 @@ dir_path_selected = []
 
 
 def select_dir_path():
-    dir_path_selected.append(tkfilebrowser.askopendirnames())
-    dir_path.set(dir_path_selected)
-    print('选中文件夹：', dir_path_selected, type(dir_path_selected))
+    win_user_desktop = os.path.join(os.path.expanduser('~'), 'Desktop')
+    dir_path_selected.append(tkfilebrowser.askopendirnames(title='选择照片文件夹', initialdir=win_user_desktop,
+                                                           okbuttontext='打开', cancelbuttontext='取消'))
+
+    transform_dir_path_selected_ls = list_to_list(dir_path_selected)
+
+    print('选中文件夹：', transform_dir_path_selected_ls, type(transform_dir_path_selected_ls))
+    dir_path.set(transform_dir_path_selected_ls)
+
     # 选中文件夹为一个列表(列表元素为每次选择的元组)，需要将其转换为字符串，再更新到配置文件
-    transform_dir_path_selected = list_to_str(dir_path_selected)
-    update_config_file('img_dir_name_list', transform_dir_path_selected)
+    transform_dir_path_selected_str = list_to_str(dir_path_selected)
+
+    update_config_file('img_dir_name_list', transform_dir_path_selected_str)
 
 
 dir_path = tk.StringVar()
@@ -153,13 +169,6 @@ def cd_excel_files_dir():
     arg = 'start explorer' + ' ' + excel_root_path
     print('进入目录：', arg)
     os.startfile(excel_root_path)
-
-    # run_result = run_button.invoke()
-    # print(run_result.split())
-    # matched_line = re.findall('Q164', run_result)
-    #
-    # print('结果', matched_line)
-    # print(run_result, type(run_result))
 
 
 tk.Label(window, text='输出Excel文件:', width=15, height=2, foreground='blue').grid(row=7, column=0)
