@@ -291,6 +291,7 @@ def dirs_images_insert_excels(image_dir_name_list, label):
     遍历所有照片文件夹，分别将其中照片插入到一个相应的excel
     """
     # img_dir_path_list = get_img_dir_path_list(img_root_dir, img_dir_name_list)
+    excel_files_list = []
     for images_dir in image_dir_name_list:
 
         excel_path = generate_new_excel(images_dir)
@@ -308,6 +309,9 @@ def dirs_images_insert_excels(image_dir_name_list, label):
         print('保存excel文件：', excel_path)
         save_excel(excel_path, wb)
 
+        excel_files_list.append(excel_path)
+
+    return excel_files_list
 
 # if __name__ == '__main__':
 #     dirs_images_insert_excels(img_dir_name_list, label_template)

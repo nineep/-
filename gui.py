@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+import re
 from configparser import ConfigParser
 
 import tkfilebrowser
@@ -62,8 +64,8 @@ def list_to_str(ls):
 # 定义GUI界面
 
 # 定义 LabelFrame1 部件
-lf1 = ttk.LabelFrame(window, text='输入文件：', height=20, width=100)
-lf1.grid(row=0, column=0, padx=1, pady=15)
+lf_input = ttk.LabelFrame(window, text='输入文件：', height=20, width=100)
+lf_input.grid(row=0, column=0, padx=1, pady=15)
 
 
 # 定义excel模板文件选择部件
@@ -75,10 +77,11 @@ def select_file():
 
 
 file_path = tk.StringVar()
-tk.Label(window, text='Excel模板文件路径:', width=15, height=2).grid(row=3, column=0)
-e = tk.Entry(window, textvariable=file_path, width=80)
-e.grid(row=3, column=1)
-tk.Button(window, text='选择文件', command=select_file, width=10, foreground='green').grid(row=3, column=2)
+tk.Label(window, text='Excel模板文件路径:', width=15, height=2, foreground='green').grid(row=3, column=0)
+e_template = tk.Entry(window, textvariable=file_path, width=80)
+e_template.grid(row=3, column=1)
+tk.Button(window, text='选择文件', command=select_file, width=10,
+          foreground='green', background='lightgreen').grid(row=3, column=2)
 
 
 # 定义excel模板文件sheet name选择部件
@@ -92,10 +95,11 @@ def input_worksheet_name():
 worksheet_name = tk.StringVar()
 worksheet_name.set('勘察照片')
 
-tk.Label(window, text='Excel模板工作表名:', width=15, height=2).grid(row=4, column=0)
-e = tk.Entry(window, textvariable=worksheet_name, width=80)
-e.grid(row=4, column=1)
-tk.Button(window, text='确认工作表名', command=input_worksheet_name, width=10, foreground='green').grid(row=4, column=2)
+tk.Label(window, text='Excel模板工作表名:', width=15, height=2, foreground='green').grid(row=4, column=0)
+e_sheet = tk.Entry(window, textvariable=worksheet_name, width=80, foreground='gray')
+e_sheet.grid(row=4, column=1)
+tk.Button(window, text='确认工作表名', command=input_worksheet_name,
+          width=10, foreground='green', background='lightgreen').grid(row=4, column=2)
 
 
 # 定义照片文件夹选择部件
@@ -112,29 +116,72 @@ def select_dir_path():
 
 
 dir_path = tk.StringVar()
-tk.Label(window, text='图片文件夹路径:', width=15, height=2).grid(row=1, column=0)
-lb = tk.Listbox(window, listvariable=dir_path, width=80, height=3)
-lb.grid(row=1, column=1)
-tk.Button(window, text='选择文件夹', command=select_dir_path, width=10, foreground='green').grid(row=1, column=2)
+tk.Label(window, text='图片文件夹路径:', width=15, height=2, foreground='green').grid(row=1, column=0)
+lb_excel_dir = tk.Listbox(window, listvariable=dir_path, width=80, height=3)
+lb_excel_dir.grid(row=1, column=1)
+tk.Button(window, text='选择文件夹', command=select_dir_path, width=10,
+          foreground='green', background='lightgreen').grid(row=1, column=2)
 
 
 # 定义运行脚本部件
 def run():
-    print('执行图片插入excel脚本。')
-    dirs_images_insert_excels(img_dir_name_list, label_template)
+    # 执行图片插入excel脚本
+    excel_files_list = dirs_images_insert_excels(img_dir_name_list, label_template)
+    # print('excel list返回值：', excel_files_list)
+    # 将生成的excel文件填入excel部件
+    for f in excel_files_list:
+        t_new_excel.insert('end', f)
 
 
 run_button = tk.Button(window, text='开始运行', command=run, width=10, foreground='red', background='pink')
 run_button.grid(row=5, column=2, padx=0, pady=15)
-
+# 获取脚本执行的结果
+# run_result = run_button.invoke()
 
 # 定义 LabelFrame2 部件
-lf2 = ttk.LabelFrame(window, text='输出文件：', height=20, width=100)
-lf2.grid(row=6, column=0, padx=1, pady=10)
+lf_output = ttk.LabelFrame(window, text='输出文件：', height=20, width=100)
+lf_output.grid(row=6, column=0, padx=1, pady=10)
 
 
+# 定义生成的excel文件部件
+def cd_excel_files_dir():
+    # 获取t_new_excel中第一个excel路径
+    excel_file_path = t_new_excel.get(0)
+    excel_root_path = os.path.dirname(excel_file_path)
+
+    # 打开系统路径
+    arg = 'start explorer' + ' ' + excel_root_path
+    print('进入目录：', arg)
+    os.startfile(excel_root_path)
+
+    # run_result = run_button.invoke()
+    # print(run_result.split())
+    # matched_line = re.findall('Q164', run_result)
+    #
+    # print('结果', matched_line)
+    # print(run_result, type(run_result))
 
 
+tk.Label(window, text='输出Excel文件:', width=15, height=2, foreground='blue').grid(row=7, column=0)
+t_new_excel = tk.Listbox(window, width=80, height=3)
+t_new_excel.grid(row=7, column=1, padx=1, pady=10)
+tk.Button(window, text='进入文件夹', command=cd_excel_files_dir, width=10,
+          foreground='blue', background='lightblue').grid(row=7, column=2)
+
+
+#定义输出日志部件
+def copy_output_log():
+    pass
+
+# output_log = tk.StringVar()
+# output_log.set(run_result)
+tk.Label(window, text='输出日志:', width=15, height=2, foreground='blue').grid(row=8, column=0)
+
+t_log = tk.Text(window, width=80, height=6)
+t_log.grid(row=8, column=1, padx=1, pady=10)
+
+tk.Button(window, text='复制日志', command=copy_output_log, width=10,
+          foreground='blue', background='lightblue').grid(row=8, column=2)
 
 
 window.mainloop()
