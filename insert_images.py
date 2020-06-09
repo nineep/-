@@ -7,25 +7,18 @@ from openpyxl import Workbook, load_workbook
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment
 
-cfg = ConfigParser()
-cfg.read('config.ini', encoding='utf-8')
-
 # 存放照片文件夹的目录
 # img_root_dir = 'C:\\Users\\ninee\\Desktop'
-img_root_dir = cfg['DEFAULT']['img_root_dir']
 
 # 照片文件夹名字列表
 # img_dir_name_list = ['中国河南南阳镇平烟草局机房', '中国河南南阳镇平烟草局机房02',
 #                      '中国河南南阳镇平烟草局机房03', '中国河南南阳镇平烟草局机房04']
-img_dir_name_list = cfg['DEFAULT']['img_dir_name_list'].split()
 
 # excel模板文件路径
 # excel_file_name = 'C:\\Users\\ninee\\Desktop\\附件2.标准勘察表--基站名.xlsx'
-excel_file_name = cfg['DEFAULT']['excel_file_name']
 
 # excel模板文件sheet表名
 # sheet_name = '勘察照片'
-sheet_name = cfg['DEFAULT']['sheet_name']
 
 # excel中照片的标签，也是照片名，供插入照片使用
 # label_template = [0, 45, 90, 135, 180, 225, 270, 315,
@@ -33,6 +26,14 @@ sheet_name = cfg['DEFAULT']['sheet_name']
 #                   51, 52, 53, 54, 55, 61, 62, 63, 64,
 #                   71, 72, 73, 74, 75, 81, 82, 83,
 #                   91, 92, 93, 94, 95, 21, 22, 23, 24, 25, 11]
+
+cfg = ConfigParser()
+cfg.read('config.ini', encoding='utf-8')
+
+img_root_dir = cfg['DEFAULT']['img_root_dir']
+img_dir_name_list = cfg['DEFAULT']['img_dir_name_list'].split()
+excel_file_name = cfg['DEFAULT']['excel_file_name']
+sheet_name = cfg['DEFAULT']['sheet_name']
 label_template = cfg['DEFAULT']['label_template'].split()
 
 
@@ -85,10 +86,10 @@ def get_images_name(images_dir, images_format='.jpg'):
     return images_dict
 
 
-def match_coordinate(field_to_match):
+def match_coordinate(field_to_match, ws):
     """
-    根据文件名，遍历列，再遍历行来匹配excel的坐标
-    返回匹配到的坐标值
+    根据文件名，遍历列，再遍历行来匹配excel的坐标，返回匹配到的坐标值
+    excel的cell.value 数据类型不固定，由value本身决定
     """
     for row in ws.iter_rows():
         for cell in row:
@@ -100,7 +101,7 @@ def match_coordinate(field_to_match):
                 return field_coordinate, field_row_num, filed_col_num
 
 
-def merge_specified_cells(begin_coordinate, end_coordinate):
+def merge_specified_cells(begin_coordinate, end_coordinate, ws):
     """
     合并指定的长*宽区间的cells
     """
@@ -108,7 +109,7 @@ def merge_specified_cells(begin_coordinate, end_coordinate):
     ws.merge_cells(cells_scope)
 
 
-def insert_image(image='img.jpg', image_name='img',
+def insert_image(ws, image='img.jpg', image_name='img',
                  cell_coordinate='E3'):
     """
     # 照片高cm/像素高：0.02644
@@ -146,7 +147,7 @@ def insert_image(image='img.jpg', image_name='img',
     ws.add_image(image_obj, cell_coordinate)
 
 
-def cell_alignment(cell_coordinate):
+def cell_alignment(cell_coordinate, ws):
     cell = ws[cell_coordinate]
     cell.alignment = Alignment(horizontal='center', vertical='center')
 
@@ -164,7 +165,7 @@ def cell_alignment_image():
     pass
 
 
-def save_excel(excel_file):
+def save_excel(excel_file, wb):
     wb.save(excel_file)
 
 
@@ -194,7 +195,43 @@ def coordinate_to_scope(row_num, col_num,
     return cells_scope, begin_coordinate, end_coordinate
 
 
-def dir_images_insert_excel(img_dir, label):
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        pass
+
+    try:
+        import unicodedata
+        unicodedata.numeric(s)
+        return True
+    except (TypeError, ValueError):
+        pass
+
+    return False
+
+
+def delete_useless_label(label, ws):
+    """
+    删除没excel中无用的数据标注
+    """
+    print('--------------------- 删除excel中无用标签 ---------------------------')
+    print('excel中标签列表：', label)
+    for excel_label in label:
+        print('--------------------------------------------------------------')
+        no_matched_file_coordinate = match_coordinate(int(excel_label), ws)
+        if no_matched_file_coordinate:
+            print('删除excel中无用的标签', excel_label)
+            ws[no_matched_file_coordinate[0]] = ''
+            # 无效标签列表无需删除，使用remove删除
+            # 导致列表元素循环时，隔一个循环打印一个
+            # label.remove(no_matched_file)
+        else:
+            print('excel中', excel_label, '标签已经在插入图片后删除，也可能压根没这标签！')
+
+
+def dir_images_insert_excel(img_dir, label, ws):
     """
     找到文件夹中的文件，获取文件名和文件路径
     在excel中匹配文件名，将匹配到的坐标旁的单元格合并
@@ -206,75 +243,55 @@ def dir_images_insert_excel(img_dir, label):
 
     for key, value in images_dict.items():
         print('********************** 照片插入操作 ********************************')
-        print('要查找的照片名：', key)
-        matched_coordinate_tuple = match_coordinate(int(key))
-        print(matched_coordinate_tuple)
-        if matched_coordinate_tuple:
-            print('插入照片：', value)
+        print('要查找的照片名：', key, type(key))
+        # 需要图片名为整型
+        if is_number(key):
+            matched_coordinate_tuple = match_coordinate(int(key), ws)
+            print(matched_coordinate_tuple)
+            if matched_coordinate_tuple:
+                print('插入照片：', value)
 
-            # 匹配到照片后，删除其数据标注
-            matched_coordinate = matched_coordinate_tuple[0]
-            ws[matched_coordinate] = ''
-            # print('目前标签列表：', label)
-            # label.remove(int(key))
+                # 匹配到照片后，删除其数据标注
+                matched_coordinate = matched_coordinate_tuple[0]
+                ws[matched_coordinate] = ''
+                # print('目前标签列表：', label)
+                # label.remove(int(key))
 
-            matched_row_num = matched_coordinate_tuple[1]
-            matched_col_num = matched_coordinate_tuple[2]
-            file_path = value
-            file_name = key
+                matched_row_num = matched_coordinate_tuple[1]
+                matched_col_num = matched_coordinate_tuple[2]
+                file_path = value
+                file_name = key
 
-            # 如果key为11，注意合并单元格的行列数
-            if key == '11':
-                coordinate_2_scope = coordinate_to_scope(
-                    matched_row_num, matched_col_num, down_extend_row_num=20, right_extend_col_num=11)
+                # 如果key为11，注意合并单元格的行列数
+                if key == '11':
+                    coordinate_2_scope = coordinate_to_scope(
+                        matched_row_num, matched_col_num, down_extend_row_num=20, right_extend_col_num=11)
+                else:
+                    coordinate_2_scope = coordinate_to_scope(matched_row_num, matched_col_num)
+                cells_scope = coordinate_2_scope[0]
+                begin_coordinate = coordinate_2_scope[1]
+
+                # 合并单元格
+                ws.merge_cells(cells_scope)
+                # 居中（对图片不起作用）
+                cell_alignment(begin_coordinate, ws)
+
+                # 将照片文件插入道指定的单元格
+                insert_image(ws, image=file_path, image_name=file_name, cell_coordinate=begin_coordinate)
             else:
-                coordinate_2_scope = coordinate_to_scope(matched_row_num, matched_col_num)
-            cells_scope = coordinate_2_scope[0]
-            begin_coordinate = coordinate_2_scope[1]
-
-            # 合并单元格
-            ws.merge_cells(cells_scope)
-            # 居中（对图片不起作用）
-            cell_alignment(begin_coordinate)
-
-            # 将照片文件插入道指定的单元格
-            insert_image(image=file_path, image_name=file_name, cell_coordinate=begin_coordinate)
+                print('在excel中，没有找到要插入照片', value, '的位置！')
         else:
-            print('在excel中，没有找到要插入照片', value, '的位置！')
+            print('图片名不是整数，无法根据图片名去插入到相应的excel label位置！')
 
-    # 删除没excel中无用的数据标注
-    print('--------------------- 删除excel中无用标签 ---------------------------')
-    print('excel中标签列表：', label)
-    for excel_label in label:
-        print('--------------------------------------------------------------')
-        no_matched_file_coordinate = match_coordinate(excel_label)
-        if no_matched_file_coordinate:
-            print('删除excel中无用的标签', excel_label)
-            ws[no_matched_file_coordinate[0]] = ''
-            # 无效标签列表无需删除，使用remove删除
-            # 导致列表元素循环时，隔一个循环打印一个
-            # label.remove(no_matched_file)
-        else:
-            print('excel中', excel_label, '标签已经在插入图片后删除，也可能压根没这标签！')
-
-    print('==============================================================')
-    print('保存excel文件：', excel_path)
-    save_excel(excel_path)
+    delete_useless_label(label, ws)
 
 
-# def dirs_images_insert_excels(image_root_dir, image_dir_name_list):
-#     """
-#     遍历所有照片文件夹，分别将其中照片插入到一个相应的excel
-#     """
-#     img_dir_path_list = get_img_dir_path_list(image_root_dir, image_dir_name_list)
-#     for images_dir in img_dir_path_list:
-#         print('开始将', images_dir, '中的照片插入相应的excel中...')
-#         dir_images_insert_excel(images_dir)
-
-
-if __name__ == '__main__':
-    img_dir_path_list = get_img_dir_path_list(img_root_dir, img_dir_name_list)
-    for images_dir in img_dir_path_list:
+def dirs_images_insert_excels(image_dir_name_list, label):
+    """
+    遍历所有照片文件夹，分别将其中照片插入到一个相应的excel
+    """
+    # img_dir_path_list = get_img_dir_path_list(img_root_dir, img_dir_name_list)
+    for images_dir in image_dir_name_list:
 
         excel_path = generate_new_excel(images_dir)
         print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
@@ -284,6 +301,13 @@ if __name__ == '__main__':
 
         print('################################################################')
         print('开始将', images_dir, '中的照片插入', excel_path)
-
         # 插入照片到excel
-        dir_images_insert_excel(images_dir, label_template)
+        dir_images_insert_excel(images_dir, label, ws)
+
+        print('==============================================================')
+        print('保存excel文件：', excel_path)
+        save_excel(excel_path, wb)
+
+
+# if __name__ == '__main__':
+#     dirs_images_insert_excels(img_dir_name_list, label_template)
