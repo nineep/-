@@ -13,6 +13,8 @@
     python3 imageXexcel.py
     
 #### windows exe
+[**zip文件下载**](https://github.com/nineep/imageXexcel/releases)
+
     # 安装pyinstaller 
     pip install pyinstaller
     
