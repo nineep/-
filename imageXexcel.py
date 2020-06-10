@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os
-import re
+import io
 from configparser import ConfigParser
+from contextlib import redirect_stdout
 
+import pyperclip
 import tkfilebrowser
 import tkinter as tk
 import tkinter.font as tkfont
@@ -141,9 +143,20 @@ tk.Button(window, text='选择文件夹', command=select_dir_path, width=10,
 
 # 定义运行脚本部件
 def run():
-    # 执行图片插入excel脚本
-    excel_files_list = dirs_images_insert_excels(img_dir_name_list, label_template)
-    # print('excel list返回值：', excel_files_list)
+
+    f_in = io.StringIO()
+    with redirect_stdout(f_in):
+
+        # 执行图片插入excel脚本
+        excel_files_list = dirs_images_insert_excels(img_dir_name_list, label_template)
+
+    f_out = f_in.getvalue()
+
+    # 显示输出日志
+    t_log.insert('end', f_out)
+    t_log.see('end')
+
+    print('excel list返回值：', excel_files_list)
     # 将生成的excel文件填入excel部件
     for f in excel_files_list:
         t_new_excel.insert('end', f)
@@ -151,8 +164,6 @@ def run():
 
 run_button = tk.Button(window, text='开始运行', command=run, width=10, foreground='red', background='pink')
 run_button.grid(row=5, column=2, padx=0, pady=15)
-# 获取脚本执行的结果
-# run_result = run_button.invoke()
 
 # 定义 LabelFrame2 部件
 lf_output = ttk.LabelFrame(window, text='输出文件：', height=20, width=100)
@@ -178,12 +189,12 @@ tk.Button(window, text='进入文件夹', command=cd_excel_files_dir, width=10,
           foreground='blue', background='lightblue').grid(row=7, column=2)
 
 
-#定义输出日志部件
+# 定义输出日志部件
 def copy_output_log():
-    pass
+    log = t_log.get('1.0', 'end')
+    pyperclip.copy(log)
 
-# output_log = tk.StringVar()
-# output_log.set(run_result)
+
 tk.Label(window, text='输出日志:', width=15, height=2, foreground='blue').grid(row=8, column=0)
 
 t_log = tk.Text(window, width=80, height=6)
