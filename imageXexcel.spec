@@ -38,6 +38,7 @@ exe = EXE(pyz,
           console=False )
 
 shutil.copyfile('config.ini', 'dist/config.ini')
+shutil.copyfile('assets/附件2.标准勘察表--基站名.xlsx', 'dist/附件2.标准勘察表--基站名.xlsx')
 shutil.copyfile('config-template.ini', 'dist/config-template.ini')
 os.rename('dist', 'imageXexcel')
 shutil.make_archive('imageXexcel', 'zip', '.')

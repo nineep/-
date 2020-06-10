@@ -24,5 +24,6 @@
     # 打exe包
     pyinstaller imageXexcel.spec
     
-    # 打包生成exe文件和配置文件会存放在imageXexcel目录
-    # 并且生成imageXexcel.zip文件
+    # 打包生成exe文件会存放在imageXexcel目录
+    # 配置文件和Excel模板文件也包含在imageXexcel目录
+    # 最终压缩生成imageXexcel.zip文件
