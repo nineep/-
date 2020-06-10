@@ -190,11 +190,13 @@ def run():
     f_out = f_in.getvalue()
 
     # 显示输出日志
-    t_log.delete(0.0, 'end')
+    # t_log.delete(0.0, 'end')
     t_log.insert('end', f_out)
     t_log.see('end')
 
     print('生成的excel list返回值：', excel_files_list)
+    # 清空excel listbox内容
+    t_new_excel.delete(0, 'end')
     # 将生成的excel文件填入excel部件
     excel_files_list.reverse()
     for f in excel_files_list:
