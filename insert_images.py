@@ -30,21 +30,21 @@ from openpyxl.styles import Alignment
 cfg = ConfigParser()
 cfg.read('config.ini', encoding='utf-8')
 
-img_root_dir = cfg['DEFAULT']['img_root_dir']
-img_dir_name_list = cfg['DEFAULT']['img_dir_name_list'].split()
-excel_file_name = cfg['DEFAULT']['excel_file_name']
-sheet_name = cfg['DEFAULT']['sheet_name']
-label_template = cfg['DEFAULT']['label_template'].split()
+# img_root_dir = cfg['DEFAULT']['img_root_dir']
+# img_dir_name_list = cfg['DEFAULT']['img_dir_name_list'].split()
+# excel_file_name = cfg['DEFAULT']['excel_file_name']
+# sheet_name = cfg['DEFAULT']['sheet_name']
+# label_template = cfg['DEFAULT']['label_template'].split()
 
 
-def generate_new_excel(img_dir, template_excel_file_name=excel_file_name):
+def generate_new_excel(img_dir, excel_file_name):
     """
     根据照片文件夹名字img_dir，生成相应excel文件名
     将excel模板文件copy到此新生成的excel文件
     返回新生成excel文件路径
     """
     base_station_name = os.path.basename(img_dir)
-    excel_dir_name = os.path.dirname(template_excel_file_name)
+    excel_dir_name = os.path.dirname(excel_file_name)
     generate_excel_name = '附件2.标准勘察表--' + base_station_name + '.xlsx'
     generate_excel_path = os.path.join(excel_dir_name, generate_excel_name)
 
@@ -286,7 +286,7 @@ def dir_images_insert_excel(img_dir, label, ws):
     delete_useless_label(label, ws)
 
 
-def dirs_images_insert_excels(image_dir_name_list, label):
+def dirs_images_insert_excels(image_dir_name_list, label, sheet_name, excel_file_name):
     """
     遍历所有照片文件夹，分别将其中照片插入到一个相应的excel
     """
@@ -294,7 +294,7 @@ def dirs_images_insert_excels(image_dir_name_list, label):
     excel_files_list = []
     for images_dir in image_dir_name_list:
 
-        excel_path = generate_new_excel(images_dir)
+        excel_path = generate_new_excel(images_dir, excel_file_name)
         print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
         print('创建一个excel文件：', excel_path)
         wb = load_workbook(excel_path, read_only=False)

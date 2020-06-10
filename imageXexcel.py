@@ -153,18 +153,22 @@ tk.Button(window, text='选择文件夹', command=select_dir_path, width=12,
 def delete_selection_path():
     # 获取选中的路径
     selection_path_cursor = lb_excel_dir.curselection()
+
+    # 更新配置文件
     content = lb_excel_dir.get(selection_path_cursor)
     contents_tuple = lb_excel_dir.get(0, 'end')
+
+    contents_list = list(contents_tuple)
+    contents_list.remove(content)
+
+    print('目前所有项：', contents_tuple, type(contents_tuple))
     print('删除选中项：', content, type(content))
-    print('所有项：', contents_tuple, type(contents_tuple))
+    print('剩余所有项：', contents_list, type(contents_list))
+
+    update_config_file('img_dir_name_list', list_to_str_2(contents_list))
 
     # 删除excel dir ListBox中的显示
     lb_excel_dir.delete(selection_path_cursor)
-
-    # 更新配置文件
-    contents_list = list(contents_tuple)
-    contents_list.remove(content)
-    update_config_file('img_dir_name_list', list_to_str_2(contents_list))
 
 
 tk.Button(window, text='删除选中文件夹', command=delete_selection_path, width=12,
@@ -173,21 +177,26 @@ tk.Button(window, text='删除选中文件夹', command=delete_selection_path, w
 
 # 定义运行脚本部件
 def run():
+    # 需要在使用前即时从配置文件读取最新值
+    img_dir_name_list = cfg['DEFAULT']['img_dir_name_list'].split()
+    print('获取的照片文件夹列表：', img_dir_name_list)
 
     f_in = io.StringIO()
     with redirect_stdout(f_in):
-
         # 执行图片插入excel脚本
-        excel_files_list = dirs_images_insert_excels(img_dir_name_list, label_template)
-
+        excel_files_list = \
+            dirs_images_insert_excels(img_dir_name_list, label_template,
+                                      sheet_name, excel_file_name)
     f_out = f_in.getvalue()
 
     # 显示输出日志
+    t_log.delete(0.0, 'end')
     t_log.insert('end', f_out)
     t_log.see('end')
 
-    print('excel list返回值：', excel_files_list)
+    print('生成的excel list返回值：', excel_files_list)
     # 将生成的excel文件填入excel部件
+    excel_files_list.reverse()
     for f in excel_files_list:
         t_new_excel.insert('end', f)
 
