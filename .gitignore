@@ -4,3 +4,4 @@ test
 __pycache__
 build
 dist
+config.ini
