@@ -5,11 +5,21 @@
 ## Usage
 ### 环境要求：Windows + python3.7 
 
+#### cli
     # 安装依赖lib
     pip install -r requirement.txt
     
     # 运行服务
     python3 imageXexcel.py
+    
+#### windows exe
+    # 安装pyinstaller 
+    pip install pyinstaller
+    
+    # 打exe包
+    pyinstaller imageXexcel.spec
+    
+    # 打包之后会生成imageXexcel目录和imageXexcel.zip文件
     
 ## TODO    
     1.选择文件夹后，支持撤销某些文件夹  
