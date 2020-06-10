@@ -38,6 +38,6 @@ exe = EXE(pyz,
           console=False )
 
 shutil.copyfile('config.ini', 'dist/config.ini')
-shutil.copyfile('config-template.ini', 'dist/config-template.ini'
+shutil.copyfile('config-template.ini', 'dist/config-template.ini')
 os.rename('dist', 'imageXexcel')
 shutil.make_archive('imageXexcel', 'zip', '.')
