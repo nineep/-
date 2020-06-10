@@ -14,6 +14,9 @@
     
 #### windows exe
 [**zip文件下载**](https://github.com/nineep/imageXexcel/releases)
+    
+    # 安装依赖lib
+    pip install -r requirement.txt
 
     # 安装pyinstaller 
     pip install pyinstaller
@@ -21,7 +24,8 @@
     # 打exe包
     pyinstaller imageXexcel.spec
     
-    # 打包之后会生成imageXexcel目录和imageXexcel.zip文件
+    # 打包生成exe文件和配置文件会存放在imageXexcel目录
+    # 并且生成imageXexcel.zip文件
     
 ## TODO    
     1.选择文件夹后，支持撤销某些文件夹  
