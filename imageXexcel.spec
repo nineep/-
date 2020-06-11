@@ -27,7 +27,7 @@ exe = EXE(pyz,
           a.binaries,
           a.zipfiles,
           a.datas,
-          [],
+          [('imageXexcel.png', 'assets/imageXexcel.png', 'DATA')],
           name='imageXexcel',
           debug=False,
           bootloader_ignore_signals=False,
@@ -35,10 +35,12 @@ exe = EXE(pyz,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False )
+          console=False, ico='assets/imageXexcel.ico')
 
 shutil.copyfile('config.ini', 'dist/config.ini')
 shutil.copyfile('assets/附件2.标准勘察表--基站名.xlsx', 'dist/附件2.标准勘察表--基站名.xlsx')
 shutil.copyfile('config-template.ini', 'dist/config-template.ini')
-os.rename('dist', 'imageXexcel')
+if os.path.exists('imageXexcel'):
+    shutil.rmtree('imageXexcel')
+    os.rename('dist', 'imageXexcel')
 shutil.make_archive('imageXexcel', 'zip', '.')
