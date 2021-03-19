@@ -2,5 +2,5 @@ pypiwin32==223
 pywin32==227
 tkfilebrowser==2.3.2
 openpyxl==3.0.3
-Pillow==7.1.2
+Pillow==8.1.1
 pyperclip==1.8.0
